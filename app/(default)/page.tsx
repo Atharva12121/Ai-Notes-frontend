@@ -1,6 +1,6 @@
 export const metadata = {
   title: "Home - Open PRO",
-  description: "Page description",
+  description: "Ai Notes",
 };
 
 import Cta from "@/components/cta";
