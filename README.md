@@ -1,9 +1,9 @@
 for start 
-npm instal 
+npm i 
 
 for run 
 npm run dev
-# or
+ or
 pnpm dev (recommended)
-# or
+ or
 yarn dev
