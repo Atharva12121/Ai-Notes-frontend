@@ -1,21 +1,19 @@
 "use client";
 
+import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-    ArrowLeft,
-    Check,
-    ChevronDown,
-    FileImage,
-    FileText,
-    Plus,
-    Sparkles,
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  FileImage,
+  FileText,
+  Plus,
+  Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
-import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
-
-// Gradient words
 const words = [
   {
     text: "✨",
@@ -46,6 +44,7 @@ const words = [
 
 export default function NoteWriter() {
   const router = useRouter();
+  const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState("General");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -73,7 +72,7 @@ export default function NoteWriter() {
       alert(`Invalid file. Expected a ${fileType?.toUpperCase()} file.`);
     }
 
-    e.target.value = ""; // Reset file input
+    e.target.value = "";
   };
 
   const handleDownload = () => {
@@ -86,7 +85,7 @@ export default function NoteWriter() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "note.txt";
+    a.download = `${title || "note"}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -112,13 +111,23 @@ export default function NoteWriter() {
           Back
         </motion.button>
 
-        {/* Note Card */}
+        {/* ✏️ Note Editor Card */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, type: "spring", stiffness: 80 }}
           className="w-full p-10 md:p-12 bg-neutral-900 border dark:border-neutral-700 rounded-2xl shadow-xl text-white space-y-6"
         >
+          {/* 🔤 Title Input */}
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter a title for your note..."
+            className="w-full text-base md:text-lg bg-neutral-800 border border-neutral-700 rounded-lg p-4 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
+          />
+
+          {/* 📝 Note Textarea */}
           <textarea
             value={note}
             onChange={(e) => setNote(e.target.value)}
@@ -132,8 +141,8 @@ export default function NoteWriter() {
             className="w-full min-h-[100px] max-h-[300px] p-4 text-lg bg-neutral-800 border border-neutral-700 rounded-lg placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none overflow-auto transition-all duration-200"
           />
 
+          {/* File Upload & Dropdowns */}
           <div className="flex justify-between items-center flex-wrap gap-4 relative">
-            {/* Upload Button + Label */}
             <div className="flex items-center gap-2 relative">
               <div className="relative">
                 <button
@@ -190,54 +199,58 @@ export default function NoteWriter() {
               </span>
             </div>
 
-            {/* Dropdown & Buttons */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="relative">
+            {/* 🔽 Category Dropdown */}
+            <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 items-center">
+              <div className="relative !w-44">
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="text-sm px-3 py-2 pr-8 rounded-md bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                  className="!text-xs !px-2 !py-1 !pr-6 !rounded !bg-neutral-800 !border !border-neutral-700 !text-white focus:!outline-none focus:!ring-2 focus:!ring-indigo-500 !appearance-none !w-full"
                 >
-                  <option>Groq</option>
-                  <option>Google Gemini</option>
-                  <option>Own Ai </option>
-                  
+                  <option>Engineering Student</option>
+                  <option>Medical Student</option>
+                  <option>IT Professional</option>
+                  <option>School Student</option>
+                  <option>Finance Student</option>
+                  <option>Marketing</option>
+                  <option>HR</option>
+                  <option>Business</option>
+                  <option>Other</option>
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={16} />
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={12} />
               </div>
+            </div>
 
-          <button
-  className="shadow-[inset_0_0_0_2px_#616467] text-black px-4 py-2 rounded-full tracking-wide uppercase text-xs font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
-  onClick={handleDownload}
->
-  ⬇️ Download
-</button>
+            {/* 🧠 Buttons */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                className="shadow-[inset_0_0_0_2px_#616467] text-black px-4 py-2 rounded-full tracking-wide uppercase text-xs font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
+                onClick={handleDownload}
+              >
+                ⬇️ Download
+              </button>
 
+              <button
+                onClick={() => alert("AI Generate")}
+                className="p-[3px] relative rounded-lg"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
+                <div className="px-8 py-2 bg-black rounded-[6px] relative flex items-center gap-1 text-xs font-semibold uppercase text-white hover:bg-transparent transition duration-200">
+                  <Sparkles size={14} />
+                  Generate
+                </div>
+              </button>
 
-
-           <button onClick={() => alert("AI Generate")} className="p-[3px] relative rounded-lg">
-  {/* Gradient Border */}
-  <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
-  
-  {/* Inner Button */}
-  <div className="px-8 py-2 bg-black rounded-[6px] relative flex items-center gap-1 text-xs font-semibold uppercase text-white hover:bg-transparent transition duration-200">
-    <Sparkles size={14} />
-    Generate
-  </div>
-</button>
-
-
-             <button
-  onClick={() => alert("Submit")}
-  className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
->
-  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-  <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold uppercase text-white backdrop-blur-3xl gap-1">
-    <Check size={14} />
-    Submit
-  </span>
-</button>
-              
+              <button
+                onClick={() => alert("Submit")}
+                className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+              >
+                <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                <span className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-4 py-2 text-xs font-semibold uppercase text-white backdrop-blur-3xl gap-1">
+                  <Check size={14} />
+                  Submit
+                </span>
+              </button>
             </div>
           </div>
         </motion.div>
