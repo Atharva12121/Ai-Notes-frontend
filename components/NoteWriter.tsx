@@ -202,6 +202,18 @@ export default function NoteWriter() {
             {/* 🔽 Category Dropdown */}
             <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 items-center">
               <div className="relative !w-44">
+  <select
+    defaultValue=""
+    className="!text-xs !px-2 !py-1 !pr-6 !rounded !bg-neutral-800 !border !border-neutral-700 !text-white focus:!outline-none focus:!ring-2 focus:!ring-indigo-500 !appearance-none !w-full"
+  >
+    <option value="" disabled hidden>Select AI (Optional)</option>
+    <option>Groq</option>
+    <option>Google Gemini</option>
+    <option>Own Ai</option>
+  </select>
+  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={12} />
+</div>
+              <div className="relative !w-44">
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
