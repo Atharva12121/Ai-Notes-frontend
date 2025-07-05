@@ -12,6 +12,10 @@ module.exports = {
         shimmer: "shimmer 2s linear infinite",
       },
       keyframes: {
+        fadeInOut: {
+        '0%, 100%': { opacity: 0 },
+        '10%, 90%': { opacity: 1 },
+      },
         shimmer: {
           from: {
             backgroundPosition: "0 0",
@@ -25,3 +29,5 @@ module.exports = {
   },
   plugins: [],
 };
+
+/* alert */

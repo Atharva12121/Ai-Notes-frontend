@@ -14,6 +14,11 @@ import {
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
+
+
+
+
+
 const words = [
   {
     text: "✨",
@@ -43,14 +48,58 @@ const words = [
 ];
 
 export default function NoteWriter() {
+    const [alertSuccess, setAlertSuccess] = useState(true);
+
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
-  const [category, setCategory] = useState("General");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [category, setCategory] = useState("Other");
+ const [Aicategory, setAicategory] = useState("");
+
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+
+
+
+    // this send the reqest to backend
+const [showAlert, setShowAlert] = useState(false);
+const [alertMessage, setAlertMessage] = useState("");
+
+ const handleSubmit = async () => {
+ try {
+      const response = await fetch("http://127.0.0.1:5000/Addnotes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          content: note,
+          category,
+          Aicategory,
+          store: true,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save note");
+
+      const data = await response.json();
+     alert("✅ Note saved successfully!");
+
+      setTitle("");
+      setNote("");
+      setAicategory("");
+    } catch (error) {
+      console.error("Error saving note:", error);
+    }
+  
+  };
+
+
+     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<"pdf" | "image" | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSelectFile = (type: "pdf" | "image") => {
     setFileType(type);
@@ -120,6 +169,7 @@ export default function NoteWriter() {
         >
           {/* 🔤 Title Input */}
           <input
+            name="title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -129,6 +179,7 @@ export default function NoteWriter() {
 
           {/* 📝 Note Textarea */}
           <textarea
+          name="content"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Start typing your note..."
@@ -203,34 +254,42 @@ export default function NoteWriter() {
             <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 items-center">
               <div className="relative !w-44">
   <select
-    defaultValue=""
+   
+    value={Aicategory}
+    onChange={(e) => setAicategory(e.target.value)}
     className="!text-xs !px-2 !py-1 !pr-6 !rounded !bg-neutral-800 !border !border-neutral-700 !text-white focus:!outline-none focus:!ring-2 focus:!ring-indigo-500 !appearance-none !w-full"
   >
-    <option value="" disabled hidden>Select AI (Optional)</option>
-    <option>Groq</option>
-    <option>Google Gemini</option>
-    <option>Own Ai</option>
+  
+    <option value="Groq">Groq</option>
+    <option value="Google Gemini">Google Gemini</option>
+    <option value="Own Ai">Own Ai</option>
   </select>
   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={12} />
 </div>
-              <div className="relative !w-44">
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="!text-xs !px-2 !py-1 !pr-6 !rounded !bg-neutral-800 !border !border-neutral-700 !text-white focus:!outline-none focus:!ring-2 focus:!ring-indigo-500 !appearance-none !w-full"
-                >
-                  <option>Engineering Student</option>
-                  <option>Medical Student</option>
-                  <option>IT Professional</option>
-                  <option>School Student</option>
-                  <option>Finance Student</option>
-                  <option>Marketing</option>
-                  <option>HR</option>
-                  <option>Business</option>
-                  <option>Other</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={12} />
-              </div>
+
+<div className="relative w-44">
+  <select
+    value={category}
+    onChange={(e) => setCategory(e.target.value)}
+    className="text-xs px-2 py-1 pr-6 rounded bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none w-full"
+  >
+    <option value="Engineering Student">Engineering Student</option>
+    <option value="Medical Student">Medical Student</option>
+    <option value="IT Professional">IT Professional</option>
+    <option value="School Student">School Student</option>
+    <option value="Finance Student">Finance Student</option>
+    <option value="Marketing">Marketing</option>
+    <option value="HR">HR</option>
+    <option value="Business">Business</option>
+    <option value="Other">Other</option>
+  </select>
+
+  <ChevronDown
+    className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+    size={12}
+  />
+</div>
+
             </div>
 
             {/* 🧠 Buttons */}
@@ -254,7 +313,7 @@ export default function NoteWriter() {
               </button>
 
               <button
-                onClick={() => alert("Submit")}
+                onClick={handleSubmit}
                 className="relative inline-flex h-12 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
               >
                 <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
@@ -270,3 +329,4 @@ export default function NoteWriter() {
     </div>
   );
 }
+
