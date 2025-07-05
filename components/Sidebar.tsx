@@ -1,69 +1,120 @@
 "use client";
 import { cn } from "@/components/lib/utils";
-
-
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
   IconArrowLeft,
   IconHome,
   IconNote,
-  IconPlus
+  IconPlus,
 } from "@tabler/icons-react";
 import { motion } from "motion/react";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CardSpotlightDemo } from "./notes_header_cards";
 
-const PinContainer = dynamic(() => import("@/components/ui/3d-pin").then(mod => mod.PinContainer), {
-  ssr: false,
-});
+const PinContainer = dynamic(
+  () => import("@/components/ui/3d-pin").then((mod) => mod.PinContainer),
+  { ssr: false }
+);
 
-export  function SidebarDemo() {
-  
+const arrCategory = [
+  {
+    label: "Engineering Student",
+    description: "AI-simplified formulas and technical notes.",
+  },
+  {
+    label: "Medical Student",
+    description: "Summarized diagnoses and clinical concepts.",
+  },
+  {
+    label: "IT Professional",
+    description: "Quick AI code references and system docs.",
+  },
+  {
+    label: "School Student",
+    description: "Exam-ready AI summaries and basics.",
+  },
+  {
+    label: "Finance Student",
+    description: "Key financial concepts in plain language.",
+  },
+  {
+    label: "Marketing",
+    description: "AI-organized campaign briefs and strategies.",
+  },
+  {
+    label: "HR",
+    description: "Policy notes and workflow guides, AI-summarized.",
+  },
+  {
+    label: "Business",
+    description: "Business plans and ideas, AI-structured.",
+  },
+  {
+    label: "Other",
+    description: "General insights powered by AI clarity.",
+  },
+];
+
+
+// Type for notes
+type Note = {
+  id: number;
+  title: string;
+  content: string;
+  category: string;
+  created_at: string;
+};
+
+export function SidebarDemo() {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+  fetch("http://127.0.0.1:5000/Notes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("✅ Notes fetched:", data); // ✅ DEBUG HERE
+      setNotes(data);
+    })
+    .catch((err) => console.error("❌ Fetch error:", err))
+    .finally(() => setLoading(false));
+}, []);
+
   const links = [
-    {
-      label: "Home",
-      href: "/",
-      icon: (
-        
-        <IconHome className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
-    {
-      label: "My Notes",
-      href: "#",
-      icon: (
-        <IconNote  className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
-    },
+    { label: "Home", href: "/", icon: <IconHome className="h-5 w-5" /> },
+    { label: "My Notes", href: "#", icon: <IconNote className="h-5 w-5" /> },
     {
       label: "Add Note",
       href: "/Addnotes",
-      icon: (
-        <IconPlus className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      icon: <IconPlus className="h-5 w-5" />,
     },
     {
       label: "Logout",
       href: "#",
-      icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
-      ),
+      icon: <IconArrowLeft className="h-5 w-5" />,
     },
   ];
-  const [open, setOpen] = useState(false);
+
+
   return (
+    
     <div
       className={cn(
-        "flex h-screen w-screen flex-col md:flex-row overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800", 
+        "flex h-screen w-screen flex-col md:flex-row overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800"
       )}
     >
-      <Sidebar open={open} setOpen={setOpen} animate={true}>
+
+        <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            <>
-              <Logo />
-            </>
+            {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
               {links.map((link, idx) => (
                 <SidebarLink key={idx} link={link} />
@@ -73,11 +124,11 @@ export  function SidebarDemo() {
           <div>
             <SidebarLink
               link={{
-                label: "Manu Arora",
+                label: "Atharva Karemore",
                 href: "#",
                 icon: (
                   <img
-                    src="https://assets.aceternity.com/manu.png"
+                    src=" "
                     className="h-7 w-7 shrink-0 rounded-full"
                     width={50}
                     height={50}
@@ -89,111 +140,152 @@ export  function SidebarDemo() {
           </div>
         </SidebarBody>
       </Sidebar>
+
       <Dashboard />
     </div>
   );
 }
-export const Logo = () => {
-  return (
-    <a
-      href="#"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-    >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-      <motion.span
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="font-medium whitespace-pre text-black dark:text-white"
-      >
-        AI Notes
-      </motion.span>
-    </a>
-  );
-};
-export const LogoIcon = () => {
-  return (
-    <a
-      href="#"
-      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
-    >
-      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
-    </a>
-  );
-};
 
-// Dummy dashboard component with content
+export const Logo = () => (
+  <a
+    href="#"
+    className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+  >
+    <div className="h-5 w-6 rounded bg-black dark:bg-white" />
+    <motion.span
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="font-medium text-black dark:text-white"
+    >
+      AI Notes
+    </motion.span>
+  </a>
+);
 
+// ✅ Accept notes as props
 const Dashboard = () => {
+
+  
+  useEffect(() => {
+  fetch("http://127.0.0.1:5000/Notes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("✅ Notes fetched:", data); // ✅ DEBUG HERE
+      setNotes(data);
+    })
+    .catch((err) => console.error("❌ Fetch error:", err))
+    .finally(() => setLoading(false));
+}, []);
+
+  const links = [
+    { label: "Home", href: "/", icon: <IconHome className="h-5 w-5" /> },
+    { label: "My Notes", href: "#", icon: <IconNote className="h-5 w-5" /> },
+    {
+      label: "Add Note",
+      href: "/Addnotes",
+      icon: <IconPlus className="h-5 w-5" />,
+    },
+    {
+      label: "Logout",
+      href: "#",
+      icon: <IconArrowLeft className="h-5 w-5" />,
+    },
+  ];
+
+
   const [isFullscreen, setIsFullscreen] = useState(false);
+   const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  if (loading) return <p className="text-white">Loading...</p>;
 
   return (
     <div className="relative flex flex-col flex-1">
-      <div className="flex h-full w-full flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white p-2 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
-        {/* Fullscreen toggle button */}
-        <button
-          onClick={() => setIsFullscreen(true)}
-          className="self-end px-4 py-2 mb-4shadow-[inset_0_0_0_2px_#616467] text-black  rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
-        >
-          Go Fullscreen
-        </button>
+  {/* Main Container */}
+  <div className="flex h-full w-full flex-col gap-4 rounded-tl-2xl border border-neutral-200 bg-white p-4 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+    
+    {/* Fullscreen Toggle Button */}
+    <button
+      onClick={() => setIsFullscreen(true)}
+      className="self-end px-4 py-2 text-black rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
+    >
+      Go Fullscreen
+    </button>
 
-        {/* Regular content */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full ">
-          <CardSpotlightDemo />
+    {/* Category Cards (Small Grid Above) */}
+  <div className="bg-neutral-900 sm:p-4">
+  <div className="grid grid-cols-3 gap-3 w-full -mt-2">
+    {arrCategory.map((cat, idx) => (
+      <CardSpotlightDemo
+        key={idx}
+        category={cat.label}
+        description={cat.description}
+      />
+    ))}
+  </div>
 
-          {[...new Array(3)].map((_, idx) => (
-            <div
-              key={`box-${idx}`}
-              className="h-20 animate-pulse rounded-lg bg-gray-100 dark:bg-neutral-800"
-            ></div>
-          ))}
-        </div>
+  
+</div>
 
-        {/* Shared grid section — styled normally or as fullscreen based on state */}
-        <div
-         className={`${
-  isFullscreen
-    ? "fixed top-0 left-0 z-50 w-full h-full bg-neutral-800 overflow-y-scroll overscroll-contain scroll-smooth p-6"
-    : "relative mt-10"
-} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 transition-all duration-300 dark:bg-neutral-800 overflow-y-auto max-h-screen p-4`}
+    {/* Fullscreen Notes Section */}
+<div
+  className={`${
+    isFullscreen
+      ? "fixed inset-0 z-50 w-full h-full bg-neutral-900 overflow-y-auto overflow-x-hidden px-4 py-6 pt-20"
+      : "relative mt-10 px-4 py-6 max-h-screen overflow-y-auto overflow-x-hidden  dark:bg-neutral-800"
+  } transition-all duration-300 grid justify-center grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-6`}
+>
 
-        >
-          {/* Close button shown only when fullscreen */}
-          {isFullscreen && (
-            <button
-              onClick={() => setIsFullscreen(false)}
-              className="absolute top-4 right-4 z-50 px-6 py-3shadow-[inset_0_0_0_2px_#616467] text-black  py-4 rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
-            >
-              Close
-            </button>
-          )}
+  {isFullscreen && (
+    <button
+      onClick={() => setIsFullscreen(false)}
+      className="absolute top-4 right-4 z-50 px-4 py-2  sm:px-6 sm:py-3 text-black rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
+    >
+      Close
+    </button>
+  )}
 
-          {[...Array(4)].map((_, idx) => (
-            <div
-              key={`pin-${idx}`}
-              className="flex items-center justify-center w-full mt-12"
-            >
-              <PinContainer
-                title="/ui.aceternity.com"
-                href="https://twitter.com/mannupaaji"
-              >
-                <div className="flex flex-col w-[28rem] h-[21.25rem] max-w-full p-4 tracking-tight text-slate-100/50">
-                  <h3 className="pb-2 m-0 font-bold text-base text-slate-100">
-                    Aceternity UI
-                  </h3>
-                  <div className="text-base m-0 p-0 font-normal">
-                    <span className="text-slate-500">
-                      Customizable Tailwind CSS and Framer Motion Components.
-                    </span>
-                  </div>
-                  <div className="flex flex-1 w-full mt-4 rounded-lg bg-gradient-to-br from-violet-500 via-purple-500 to-blue-500" />
-                </div>
-              </PinContainer>
-            </div>
-          ))}
-        </div>
+  {notes.length === 0 ? (
+    <p className="text-white col-span-full text-center">No notes found.</p>
+  ) : (
+    notes.map((note) => (
+      <div
+        key={note.id}
+        className="flex items-center justify-center p-2"
+      >
+        <PinContainer
+          title={note.title}
+          content={note.content}
+          category={note.category}
+          createdAt={note.created_at}
+        />
       </div>
-    </div>
+    ))
+  )}
+</div>
+
+
+
+
+
+
+  </div>
+</div>
+
+  );
+};
+  export const LogoIcon = () => {
+  return (
+    <a
+      href="#"
+      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+    >
+      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+    </a>
   );
 };
 

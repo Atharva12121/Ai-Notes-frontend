@@ -1,19 +1,31 @@
 import { CardSpotlight } from "@/components/ui/card-spotlight";
 
-export function CardSpotlightDemo() {
+type Props = {
+  category: string;
+  description: string;
+};
+
+export function CardSpotlightDemo({ category, description }: Props) {
   return (
-<CardSpotlight className="relative flex flex-col justify-center rounded-md p-4 bg-gradient-to-br  h-full w-full shadow-sm">
-  <p className="text-base font-semibold z-10 text-white">
-    Engineering Digest AI 
+  <CardSpotlight
+  className="relative flex flex-col justify-center items-center rounded-md p-2 sm:p-4 
+             bg-gradient-to-br from-neutral-800 to-neutral-700 
+             group h-24 w-[100px] sm:h-full sm:w-full shadow-sm overflow-hidden"
+>
+  {/* ✅ Static hover background layer, no animation change */}
+
+  {/* ✅ Text content stays clean and above background */}
+  <p className="text-[10px] sm:text-sm font-bold text-white text-center relative z-10 leading-tight">
+    {category}
   </p>
-  <p className="text-xs text-neutral-100 mt-1 z-10">
-   Organize your engineering notes with smart, AI-powered clarity — detailed, easy to follow, and made for better understanding
+  <p className="text-[8px] sm:text-xs text-neutral-200 text-center mt-1 relative z-10">
+    {description}
   </p>
 </CardSpotlight>
 
-
   );
 }
+
 
 const Step = ({ title }: { title: string }) => {
   return (
