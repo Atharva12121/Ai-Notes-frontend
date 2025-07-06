@@ -249,23 +249,25 @@ const Dashboard = () => {
     </button>
   )}
 
-  {notes.length === 0 ? (
-    <p className="text-white col-span-full text-center">No notes found.</p>
-  ) : (
-    notes.map((note) => (
-      <div
-        key={note.id}
-        className="flex items-center justify-center p-2"
-      >
-        <PinContainer
-          title={note.title}
-          content={note.content}
-          category={note.category}
-          createdAt={note.created_at}
-        />
-      </div>
-    ))
-  )}
+ {notes.length === 0 ? (
+  <p className="text-white col-span-full text-center">Add notes Notes.</p>
+) : (
+  notes.map((note) => (
+    <a
+      key={note.id}
+      href={`/ViewSingleNote/${note.id}`}
+      className="flex items-center justify-center p-2 no-underline"
+    >
+      <PinContainer
+        title={note.title}
+        content={note.content}
+        category={note.category}
+        createdAt={note.created_at}
+      />
+    </a>
+  ))
+)}
+
 </div>
 
 

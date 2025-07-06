@@ -35,49 +35,49 @@ export const PinContainer = ({
   };
 
   return (
-     <div
-    className={cn(
-      "relative group/pin z-10 cursor-pointer w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[400px]",
-      containerClassName
-    )}
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
-  >
     <div
-      style={{
-        perspective: "1000px",
-        transform: "rotateX(70deg) translateZ(0deg)",
-      }}
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+      className={cn(
+        "relative group/pin z-10 w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[400px]",
+        containerClassName
+      )}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div
-        style={{ transform }}
-className="absolute left-1/2 top-1/2 w-[150px] sm:w-[220px] md:w-[240px] lg:w-[260px] h-[260px] p-3 flex justify-start items-start rounded-2xl shadow-[0_8px_16px_rgb(0_0_0/0.4)] bg-black border border-white/[0.1] group-hover/pin:border-white/[0.2] transition duration-700 overflow-hidden"
+        style={{
+          perspective: "1000px",
+          transform: "rotateX(70deg) translateZ(0deg)",
+        }}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
       >
-        <div className={cn("relative z-50", className)}>
-          {children ? (
-            children
-          ) : (
-            <div className="flex flex-col w-full h-auto min-h-[9rem] sm:min-h-[10rem] md:min-h-[11rem] lg:min-h-[12rem] p-2 sm:p-3 md:p-4 text-slate-100/50">
-              <h3 className="pb-1 m-0 font-bold text-xs sm:text-sm text-slate-100">
-                {title}
-              </h3>
-              <p className="text-[9px] sm:text-[10px] text-slate-400 mb-1">
-                {category}
-              </p>
-              <p className="text-[8px] sm:text-[9px] text-slate-500 mb-2">
-                {createdAt}
-              </p>
-              <div className="text-[10px] sm:text-xs text-slate-300 line-clamp-5">
-                {content}
+        <div
+          style={{ transform }}
+          className="absolute left-1/2 top-1/2 w-[150px] sm:w-[220px] md:w-[240px] lg:w-[260px] h-[260px] p-3 flex justify-start items-start rounded-2xl shadow-[0_8px_16px_rgb(0_0_0/0.4)] bg-black border border-white/[0.1] group-hover/pin:border-white/[0.2] transition duration-700 overflow-hidden"
+        >
+          <div className={cn("relative z-50", className)}>
+            {children ? (
+              children
+            ) : (
+              <div className="flex flex-col w-full h-auto min-h-[9rem] sm:min-h-[10rem] md:min-h-[11rem] lg:min-h-[12rem] p-2 sm:p-3 md:p-4 text-slate-100/50">
+                <h3 className="pb-1 m-0 font-bold text-xs sm:text-sm text-slate-100">
+                  {title}
+                </h3>
+                <p className="text-[9px] sm:text-[10px] text-slate-400 mb-1">
+                  {category}
+                </p>
+                <p className="text-[8px] sm:text-[9px] text-slate-500 mb-2">
+                  {new Date(createdAt).toLocaleString()}
+                </p>
+                <div className="text-[10px] sm:text-xs text-slate-300 line-clamp-5">
+                  {content}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
+      <PinPerspective title={title} />
     </div>
-    <PinPerspective title={title} />
-  </div>
   );
 };
 
