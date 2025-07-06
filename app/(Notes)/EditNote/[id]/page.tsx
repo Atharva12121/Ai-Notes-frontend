@@ -47,7 +47,9 @@ export default function EditNotePage() {
   if (!note) return <p className="text-red-500 text-center p-10">❌ Note not found.</p>;
 
   return (
-    <BackgroundLines className="relative flex items-center justify-center w-full min-h-screen px-4 py-10">
+    <BackgroundLines className=" rounded-[22px] relative flex items-center justify-center w-full min-h-screen px-4 py-9 ">
+    
+
   <EditableNote
     id={note.id}
     title={note.title}
@@ -56,6 +58,8 @@ export default function EditNotePage() {
     aiSource={note.aiSource}
     created_at={note.created_at}
   />
+
+
  </BackgroundLines>
 
   );
