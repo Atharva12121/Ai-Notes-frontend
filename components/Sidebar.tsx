@@ -199,9 +199,35 @@ const Dashboard = () => {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
    const [notes, setNotes] = useState<Note[]>([]);
+
+   // loading component
   const [loading, setLoading] = useState(true);
   
-  if (loading) return <p className="text-white">Loading...</p>;
+  if (loading) return <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 text-white animate-pulse">
+  <svg
+    className="w-10 h-10 mb-4 animate-spin text-indigo-400"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8v8z"
+    />
+  </svg>
+  <p className="text-2xl sm:text-3xl font-semibold">Loading...</p>
+</div>
+
+
 
   return (
     <div className="relative flex flex-col flex-1">
