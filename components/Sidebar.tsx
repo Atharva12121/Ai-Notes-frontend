@@ -279,6 +279,11 @@ const Dashboard = () => {
   <p className="text-white col-span-full text-center">Add notes Notes.</p>
 ) : (
   notes.map((note) => (
+       <div
+      key={note.id}
+      className="relative group flex items-center justify-center p-2"
+    >
+  
     <a
       key={note.id}
       href={`/ViewSingleNote/${note.id}`}
@@ -291,6 +296,7 @@ const Dashboard = () => {
         createdAt={note.created_at}
       />
     </a>
+    </div>
   ))
 )}
 
