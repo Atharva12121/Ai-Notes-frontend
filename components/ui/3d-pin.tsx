@@ -43,6 +43,8 @@ export const PinContainer = ({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
+ 
+
       <div
         style={{
           perspective: "1000px",
@@ -54,6 +56,8 @@ export const PinContainer = ({
           style={{ transform }}
           className="absolute left-1/2 top-1/2 w-[150px] sm:w-[220px] md:w-[240px] lg:w-[260px] h-[260px] p-3 flex justify-start items-start rounded-2xl shadow-[0_8px_16px_rgb(0_0_0/0.4)] bg-black border border-white/[0.1] group-hover/pin:border-white/[0.2] transition duration-700 overflow-hidden"
         >
+
+
           <div className={cn("relative z-50", className)}>
             {children ? (
               children

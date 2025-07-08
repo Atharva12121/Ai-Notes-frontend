@@ -1,12 +1,19 @@
 "use client";
-import ConfirmDialog from "@/components/ConfirmDialog";
-import Toast from "@/components/Toast";
+
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
-import { ArrowLeft, Download, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
+import {
+    ArrowLeft,
+    Download,
+    Maximize2,
+    Minimize2,
+    Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import ConfirmDialogDelete from "./ConfirmDialogDelete";
+
+import Toast from "@/components/Toast";
+
 type Props = {
   id: number;
   title: string;
@@ -15,45 +22,35 @@ type Props = {
   createdAt: string;
 };
 
-export default function SingleNoteView({
-  id,
-  title,
-  content,
-  category,
-  createdAt,
-}: Props) {
+export default function SingleNoteView({ id, title, content, category, createdAt }: Props) {
   const router = useRouter();
 
-  const [selectedCategory] = useState(category);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
 
   const triggerToast = (message: string, type: "success" | "error" | "warning" = "success") => {
     setToast({ message, type });
+
+    // Show toast for 3 seconds
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleEditConfirm = () => {
-    setConfirmOpen(false);
-    router.push(`/EditNote/${id}`);
-  };
-
   const handleDeleteConfirm = async () => {
+    setConfirmOpen(false);
     try {
-      // ✅ Replace this with actual backend call
-      const res = await fetch(`http://127.0.0.1:5000/delete/${id}`, { method: "DELETE" });
-      const data = await res.json();
+      const res = await fetch(`http://127.0.0.1:5000/delete/${id}`, {
+        method: "DELETE",
+      });
 
       if (res.ok) {
-        triggerToast("🗑️ Note deleted successfully", "success");
-        router.push("/Notes"); // ✅ Redirect to home or list page
+        triggerToast("✅ Note deleted successfully!", "success");
+
       } else {
-        throw new Error(data.message || "Failed to delete");
+        triggerToast("❌ Failed to delete note.", "error");
       }
     } catch (error) {
-      triggerToast("❌ Failed to delete note", "error");
+      triggerToast("❌ Server error. Please try again.", "error");
     }
   };
 
@@ -62,17 +59,21 @@ export default function SingleNoteView({
       const doc = new jsPDF();
       doc.setFont("helvetica", "bold");
       doc.setFontSize(14);
+
       const pageWidth = doc.internal.pageSize.getWidth();
-      const textWidth = doc.getTextWidth(title);
+      const titleText = title || "Note";
+      const textWidth = doc.getTextWidth(titleText);
       const centerX = (pageWidth - textWidth) / 2;
-      doc.text(title, centerX, 20);
+
+      doc.text(titleText, centerX, 20);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       const splitContent = doc.splitTextToSize(content, 180);
       doc.text(splitContent, 10, 35);
-      doc.save(`${title}.pdf`);
+      doc.save(`${titleText}.pdf`);
+
       triggerToast("✅ PDF downloaded successfully!", "success");
-    } catch {
+    } catch (err) {
       triggerToast("❌ Failed to generate PDF.", "error");
     }
   };
@@ -101,13 +102,21 @@ export default function SingleNoteView({
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="text-sm flex items-center gap-1 text-white hover:text-indigo-300 transition"
           >
-            {isFullscreen ? <><Minimize2 size={16} /> Exit Fullscreen</> : <><Maximize2 size={16} /> Fullscreen</>}
+            {isFullscreen ? (
+              <>
+                <Minimize2 size={16} /> Exit Fullscreen
+              </>
+            ) : (
+              <>
+                <Maximize2 size={16} /> Fullscreen
+              </>
+            )}
           </button>
         </div>
 
         <div className="space-y-1">
           <h1 className="text-xl md:text-2xl font-bold text-indigo-400">{title}</h1>
-          <p className="text-sm text-neutral-400">{selectedCategory} • {createdAt}</p>
+          <p className="text-sm text-neutral-400">{category} • {createdAt}</p>
         </div>
 
         <div className="max-h-[500px] overflow-y-auto text-sm md:text-base text-neutral-200 whitespace-pre-wrap leading-relaxed pr-2">
@@ -125,43 +134,17 @@ export default function SingleNoteView({
 
           <button
             onClick={() => setConfirmOpen(true)}
-            className="relative inline-flex h-8 sm:h-10 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400"
+            className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full text-xs font-semibold transition shadow"
           >
-            <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-            <span className="inline-flex h-full w-full items-center justify-center rounded-full bg-slate-950 px-4 sm:px-5 text-[10px] sm:text-xs font-semibold uppercase text-white backdrop-blur-3xl gap-1 relative z-10">
-              <Pencil size={12} />
-              Edit Note
-            </span>
-          </button>
-
-          {/* 🗑️ Delete Button */}
-          <button
-            onClick={() => setDeleteConfirm(true)}
-            className="bg-red-600 text-white px-4 py-2 rounded-full text-xs font-semibold uppercase shadow hover:bg-red-700 transition duration-200"
-          >
-            <Trash2 className="inline mr-1 w-4 h-4" />
-            Delete
+            <Trash2 size={14} /> Delete Note
           </button>
         </div>
       </motion.div>
 
-      {/* ✅ Edit Note Dialog */}
-      <ConfirmDialog
-        isOpen={confirmOpen}
-        message="Do you want to edit this note?"
-        onCancel={() => setConfirmOpen(false)}
-        onConfirm={handleEditConfirm}
-      />
+      {/* Confirmation Dialog */}
+   
 
-      {/* ✅ Delete Note Dialog */}
-      <ConfirmDialogDelete
-        isOpen={deleteConfirm}
-        message="Are you sure you want to delete this note?"
-        onCancel={() => setDeleteConfirm(false)}
-        onConfirm={handleDeleteConfirm}
-      />
-
-      {/* ✅ Toast */}
+      {/* Toast Message */}
       {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
   );
