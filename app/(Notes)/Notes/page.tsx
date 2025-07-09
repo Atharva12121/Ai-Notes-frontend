@@ -1,4 +1,4 @@
-'use client';
+
 import { SidebarDemo } from "@/components/Sidebar";
 export default function NotesPage() {
 return (
