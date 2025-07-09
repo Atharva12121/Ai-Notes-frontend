@@ -1,4 +1,4 @@
-"use client";
+
 
 import SingleNoteViewWrapper from "@/components/SingleNoteViewWrapper";
 
