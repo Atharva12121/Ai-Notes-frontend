@@ -14,6 +14,8 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import LoadingOverlay from "./LoadingOverlay";
 
+
+
 const words = [
   { text: "✨", className: "!bg-gradient-to-r !from-purple-500 !via-violet-500 !to-pink-500 !bg-clip-text !text-transparent" },
   { text: "Build", className: "!bg-gradient-to-r !from-purple-500 !via-violet-500 !to-pink-500 !bg-clip-text !text-transparent" },
@@ -37,6 +39,10 @@ export default function NoteWriter() {
   const [menuOpen, setMenuOpen] = useState(false);
 const [generating, setGenerating] = useState(false);
 
+
+const [aiCategory, setAiCategory] = useState("ChatGPT");
+
+
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
   const [errors, setErrors] = useState<{ title?: string; note?: string }>({});
 
@@ -46,27 +52,86 @@ const [generating, setGenerating] = useState(false);
   };
 
   const handleSelectFile = (type: "pdf" | "image") => {
-    setFileType(type);
-    setMenuOpen(false);
-    setTimeout(() => fileInputRef.current?.click(), 100);
-  };
+  setFileType(type);
+  setMenuOpen(false);
+  setTimeout(() => fileInputRef.current?.click(), 100);
+};
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return triggerToast("❌ Failed to upload file", "error");
+const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return triggerToast("❌ Failed to upload file", "error");
 
-    const isPDF = file.type === "application/pdf";
-    const isImage = file.type.startsWith("image/");
+  const isPDF = file.type === "application/pdf";
+  const isImage = file.type.startsWith("image/");
 
-    if ((fileType === "pdf" && isPDF) || (fileType === "image" && isImage)) {
-      setUploadedFile(file);
-      triggerToast(`📄 ${fileType?.toUpperCase()} uploaded: ${file.name}`);
-    } else {
-      alert(`Invalid file. Expected a ${fileType?.toUpperCase()} file.`);
+  if ((fileType === "pdf" && isPDF) || (fileType === "image" && isImage)) {
+    setUploadedFile(file);
+    triggerToast(`📄 ${fileType?.toUpperCase()} uploaded: ${file.name}`);
+
+    // ✅ Automatically trigger generation if it's a PDF
+    if (fileType === "pdf" && isPDF) {
+      setTimeout(() => {
+        handleGenerateFromPDF();
+      }, 300); // small delay to ensure state update
     }
+  } else {
+    alert(`Invalid file. Expected a ${fileType?.toUpperCase()} file.`);
+  }
 
-    e.target.value = "";
-  };
+  e.target.value = "";
+};
+
+const handleGenerateFromPDF = async () => {
+  if (!uploadedFile) {
+    triggerToast("Please upload a file and fill category", "error");
+    return;
+  }
+
+  const selectedAI = Aicategory || "ChatGPT";
+ const categorys = category || "ChatGPT";
+  const formData = new FormData();
+  formData.append("file", uploadedFile);
+  formData.append("category", categorys);
+  formData.append("ai_category", selectedAI);
+
+  try {
+    const res = await fetch("http://localhost:5000/generate-pdf", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      sessionStorage.setItem("title", uploadedFile.name.replace(".pdf", ""));
+      sessionStorage.setItem("content", data.output);
+      sessionStorage.setItem("category", category);
+      sessionStorage.setItem("ai_category", selectedAI);
+
+      triggerToast("✅ AI generation successful", "success");
+      router.push("/EditPdfGeneratedNote");
+    } else {
+      triggerToast("❌ AI generation failed", "error");
+    }
+  } catch (error) {
+    console.error("Upload error:", error);
+    triggerToast("❌ Server error", "error");
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
  const handleDownloadPDF = () => {
   try {

@@ -56,8 +56,6 @@ const arrCategory = [
   },
 ];
 
-
-// Type for notes
 type Note = {
   id: number;
   title: string;
@@ -73,19 +71,19 @@ export function SidebarDemo() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-  fetch("http://127.0.0.1:5000/Notes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("✅ Notes fetched:", data); // ✅ DEBUG HERE
-      setNotes(data);
+    fetch("http://127.0.0.1:5000/Notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
     })
-    .catch((err) => console.error("❌ Fetch error:", err))
-    .finally(() => setLoading(false));
-}, []);
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ Notes fetched:", data);
+        setNotes(data);
+      })
+      .catch((err) => console.error("❌ Fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const links = [
     { label: "Home", href: "/", icon: <IconHome className="h-5 w-5" /> },
@@ -102,16 +100,13 @@ export function SidebarDemo() {
     },
   ];
 
-
   return (
-    
     <div
       className={cn(
         "flex h-screen w-screen flex-col md:flex-row overflow-hidden border border-neutral-200 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800"
       )}
     >
-
-        <Sidebar open={open} setOpen={setOpen}>
+      <Sidebar open={open} setOpen={setOpen}>
         <SidebarBody className="justify-between gap-10">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
             {open ? <Logo /> : <LogoIcon />}
@@ -162,157 +157,149 @@ export const Logo = () => (
   </a>
 );
 
-// ✅ Accept notes as props
 const Dashboard = () => {
-
-  
-  useEffect(() => {
-  fetch("http://127.0.0.1:5000/Notes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log("✅ Notes fetched:", data); // ✅ DEBUG HERE
-      setNotes(data);
-    })
-    .catch((err) => console.error("❌ Fetch error:", err))
-    .finally(() => setLoading(false));
-}, []);
-
-  const links = [
-    { label: "Home", href: "/", icon: <IconHome className="h-5 w-5" /> },
-    { label: "My Notes", href: "#", icon: <IconNote className="h-5 w-5" /> },
-    {
-      label: "Add Note",
-      href: "/Addnotes",
-      icon: <IconPlus className="h-5 w-5" />,
-    },
-    {
-      label: "Logout",
-      href: "#",
-      icon: <IconArrowLeft className="h-5 w-5" />,
-    },
-  ];
-
-
   const [isFullscreen, setIsFullscreen] = useState(false);
-   const [notes, setNotes] = useState<Note[]>([]);
-
-   // loading component
+  const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  if (loading) return <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 text-white animate-pulse">
-  <svg
-    className="w-10 h-10 mb-4 animate-spin text-indigo-400"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    />
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8v8z"
-    />
-  </svg>
-  <p className="text-2xl sm:text-3xl font-semibold">Loading...</p>
-</div>
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
+  useEffect(() => {
+    fetch("http://127.0.0.1:5000/Notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("✅ Notes fetched:", data);
+        setNotes(data);
+      })
+      .catch((err) => console.error("❌ Fetch error:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
+  if (loading)
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/60 text-white animate-pulse">
+        <svg
+          className="w-10 h-10 mb-4 animate-spin text-indigo-400"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v8z"
+          />
+        </svg>
+        <p className="text-2xl sm:text-3xl font-semibold">Loading...</p>
+      </div>
+    );
 
   return (
     <div className="relative flex flex-col flex-1">
-  {/* Main Container */}
-  <div className="flex h-full w-full flex-col gap-4 rounded-tl-2xl border border-neutral-200 bg-white p-4 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
-    
-    {/* Fullscreen Toggle Button */}
-    <button
-      onClick={() => setIsFullscreen(true)}
-      className="self-end px-4 py-2 text-black rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
-    >
-      Go Fullscreen
-    </button>
+      <div className="flex h-full w-full flex-col gap-4 rounded-tl-2xl border border-neutral-200 bg-white p-4 md:p-10 dark:border-neutral-700 dark:bg-neutral-900">
+        <button
+          onClick={() => setIsFullscreen(true)}
+          className="self-end px-4 py-2 text-black rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
+        >
+          Go Fullscreen
+        </button>
 
-    {/* Category Cards (Small Grid Above) */}
-  <div className="bg-neutral-900 sm:p-4">
-  <div className="grid grid-cols-3 gap-3 w-full -mt-2">
-    {arrCategory.map((cat, idx) => (
-      <CardSpotlightDemo
-        key={idx}
-        category={cat.label}
-        description={cat.description}
-      />
-    ))}
-  </div>
+        <div className="bg-neutral-900 sm:p-4">
+          <div className="grid grid-cols-3 gap-3 w-full -mt-2">
+            {arrCategory.map((cat, idx) => (
+              <div
+                key={idx}
+                className="cursor-pointer"
+                onClick={() => setSelectedCategory(cat.label)}
+              >
+                <CardSpotlightDemo
+                  category={cat.label}
+                  description={cat.description}
+                />
+              </div>
+            ))}
+          </div>
 
-  
-</div>
+          {selectedCategory && (
+            <div className="text-center mt-2">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="bg-red-600 text-white px-4 py-1 rounded-full text-sm hover:bg-red-700 transition"
+              >
+                Clear Filter: {selectedCategory}
+              </button>
+            </div>
+          )}
+        </div>
 
-    {/* Fullscreen Notes Section */}
-<div
-  className={`${
-    isFullscreen
-      ? "fixed inset-0 z-50 w-full h-full bg-neutral-900 overflow-y-auto overflow-x-hidden px-4 py-6 pt-20"
-      : "relative mt-10 px-4 py-6 max-h-screen overflow-y-auto overflow-x-hidden  dark:bg-neutral-800"
-  } transition-all duration-300 grid justify-center grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-6`}
->
+        <div
+          className={`${
+            isFullscreen
+              ? "fixed inset-0 z-50 w-full h-full bg-neutral-900 overflow-y-auto overflow-x-hidden px-4 py-6 pt-20"
+              : "relative mt-10 px-4 py-6 max-h-screen overflow-y-auto overflow-x-hidden dark:bg-neutral-800"
+          } transition-all duration-300 grid justify-center grid-cols-2 md:grid-cols-3 gap-x-5 gap-y-6`}
+        >
+          {isFullscreen && (
+            <button
+              onClick={() => setIsFullscreen(false)}
+              className="absolute top-4 right-4 z-50 px-4 py-2 sm:px-6 sm:py-3 text-black rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
+            >
+              
+              Close
+            </button>
+            
+          )
+          
+          }
 
-  {isFullscreen && (
-    <button
-      onClick={() => setIsFullscreen(false)}
-      className="absolute top-4 right-4 z-50 px-4 py-2  sm:px-6 sm:py-3 text-black rounded-full tracking-widest uppercase font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
-    >
-      Close
-    </button>
-  )}
-
- {notes.length === 0 ? (
-  <p className="text-white col-span-full text-center">Add notes Notes.</p>
-) : (
-  notes.map((note) => (
-       <div
-      key={note.id}
-      className="relative group flex items-center justify-center p-2"
-    >
-  
-    <a
-      key={note.id}
-      href={`/ViewSingleNote/${note.id}`}
-      className="flex items-center justify-center p-2 no-underline"
-    >
-      <PinContainer
-        title={note.title}
-        content={note.content}
-        category={note.category}
-        createdAt={note.created_at}
-      />
-    </a>
+          {notes.filter((note) =>
+            selectedCategory ? note.category === selectedCategory : true
+          ).length === 0 ? (
+            <p className="text-white col-span-full text-center">
+              Add notes Notes.
+            </p>
+          ) : (
+            notes
+              .filter((note) =>
+                selectedCategory ? note.category === selectedCategory : true
+              )
+              .map((note) => (
+                <div
+                  key={note.id}
+                  className="relative group flex items-center justify-center p-2"
+                >
+                  <a
+                    href={`/ViewSingleNote/${note.id}`}
+                    className="flex items-center justify-center p-2 no-underline"
+                  >
+                    <PinContainer
+                      title={note.title}
+                      content={note.content}
+                      category={note.category}
+                      createdAt={note.created_at}
+                    />
+                  </a>
+                </div>
+              ))
+          )}
+        </div>
+      </div>
     </div>
-  ))
-)}
-
-</div>
-
-
-
-
-
-
-  </div>
-</div>
-
   );
 };
-  export const LogoIcon = () => {
+
+export const LogoIcon = () => {
   return (
     <a
       href="#"
