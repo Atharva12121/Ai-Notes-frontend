@@ -1,13 +1,13 @@
-"use client";
+
 
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import {
-    ArrowLeft,
-    Download,
-    Maximize2,
-    Minimize2,
-    Trash2,
+  ArrowLeft,
+  Download,
+  Maximize2,
+  Minimize2,
+  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
