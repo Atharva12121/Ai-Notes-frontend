@@ -1,7 +1,6 @@
 "use client";
-
 import { motion } from "framer-motion";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Loader2, Maximize2, Minimize2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -40,7 +39,7 @@ export default function EditableNote({
 
   const [toast, setToast] = useState<{ message: string; success: boolean } | null>(null);
   const [toastType, setToastType] = useState<ToastType>("success");
-  const [Aicategory, setAicategory] = useState("Google Gemini");
+  const [Aicategory, setAicategory] = useState("");
 
   const [generating, setGenerating] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; note?: string }>({});
@@ -156,6 +155,18 @@ export default function EditableNote({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: "spring" }}
       >
+          {generating && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          >
+            <div className="flex flex-col items-center gap-4 p-6 bg-neutral-900 rounded-xl shadow-xl border border-blue-600">
+              <Loader2 className="animate-spin h-8 w-8 text-blue-400" />
+              <p className="text-lg text-blue-300 font-semibold">Generating note...</p>
+            </div>
+          </motion.div>
+        )}
         <div className="flex justify-between items-center mb-6">
           <button
             onClick={() => (isFullscreen ? setIsFullscreen(false) : router.back())}
@@ -244,8 +255,11 @@ export default function EditableNote({
             value={aiSource}
             onChange={(e) => setAiSource(e.target.value)}
           >
+            <option value="ChatGPT">ChatGPT</option>
+            <option value="Groq">Groq</option> 
+            <option value="LLaMA">LLaMA</option>
             <option value="Google Gemini">Google Gemini</option>
-            <option value="Groq">Groq</option>
+            <option value="DeepSeek">DeepSeek</option>
             
             
           </select>
