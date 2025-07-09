@@ -1,14 +1,13 @@
 "use client";
-
 import ConfirmDialog from "@/components/ConfirmDialog";
 import Toast from "@/components/Toast";
 import { TypewriterEffectSmooth } from "@/components/ui/typewriter-effect";
 import { AnimatePresence, motion } from "framer-motion";
+import { jsPDF } from "jspdf";
 import {
   ArrowLeft, Check, ChevronDown,
   FileImage,
-  FileText,
-  Plus,
+  FileText, Loader2, Plus,
   Sparkles
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -28,7 +27,7 @@ export default function NoteWriter() {
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState("Other");
-  const [Aicategory, setAicategory] = useState("");
+  const [Aicategory, setAicategory] = useState("Google Gemini");
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -36,6 +35,7 @@ export default function NoteWriter() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<"pdf" | "image" | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+const [generating, setGenerating] = useState(false);
 
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
   const [errors, setErrors] = useState<{ title?: string; note?: string }>({});
@@ -68,20 +68,46 @@ export default function NoteWriter() {
     e.target.value = "";
   };
 
-  const handleDownload = () => {
-    if (!note.trim()) return triggerToast("⚠️ Note is empty.", "warning");
+ const handleDownloadPDF = () => {
+  try {
+    const doc = new jsPDF();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginTop = 20;
+    const marginLeft = 10;
+    const lineHeight = 7;
+    const maxLineWidth = 180;
 
-    const blob = new Blob([note], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${title || "note"}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
 
-    triggerToast("✅ Note downloaded successfully!");
-  };
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const titleWidth = doc.getTextWidth(title);
+    const titleX = (pageWidth - titleWidth) / 2;
+    doc.text(title, titleX, marginTop);
 
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+
+    const lines = doc.splitTextToSize(note, maxLineWidth); // ✅ FIXED HERE
+
+    let cursorY = marginTop + 15;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (cursorY + lineHeight > pageHeight - 10) {
+        doc.addPage();
+        cursorY = 20;
+      }
+      doc.text(lines[i], marginLeft, cursorY);
+      cursorY += lineHeight;
+    }
+
+    doc.save(`${title}.pdf`);
+    triggerToast("✅ PDF downloaded successfully!", "success");
+  } catch (err) {
+    console.error(err);
+    triggerToast("❌ Failed to generate PDF.", "error");
+  }
+}
   const handleSubmit = async () => {
     const newErrors: { title?: string; note?: string } = {};
     if (!title.trim()) newErrors.title = "Title is required.";
@@ -125,10 +151,61 @@ export default function NoteWriter() {
     }
   };
 
+
+
+
+  // Generate button 
+
+const handleGenerate = async () => {
+  const newErrors: { title?: string; note?: string } = {};
+  if (!title.trim()) newErrors.title = "Title is required.";
+  if (!note.trim()) newErrors.note = "Note content is required.";
+
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    triggerToast("❌ Please fill the form.", "error");
+    return;
+  }
+
+  setGenerating(true); // show message
+  try {
+    const response = await fetch("http://127.0.0.1:5000/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        note,
+        category,
+        ai_category: Aicategory,
+      }),
+    });
+
+    if (!response.ok) throw new Error("Generation failed");
+
+    const data = await response.json();
+
+    sessionStorage.setItem("title", title);
+    sessionStorage.setItem("category", category);
+    sessionStorage.setItem("note", note);
+    sessionStorage.setItem("generated", data.generated_content);
+
+    router.push("/EditGeneratedNote");
+  } catch (err) {
+    triggerToast("❌ Failed to generate note", "error");
+    console.error(err);
+  } finally {
+    setGenerating(false); // hide message
+  }
+};
+
+
+
+
+
   return (
     <>
       {loading && <LoadingOverlay message="Saving..." />}
-
+     
       <div className="relative z-10 px-4 pt-2 w-full">
         <div className="max-w-5xl w-full mx-auto px-2 sm:px-4">
           <div className="text-center">
@@ -138,7 +215,7 @@ export default function NoteWriter() {
           <motion.button
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            onClick={() => router.back()}
+           onClick={() => router.push("/")}
             className="mt-1 mb-2 flex items-center gap-2 text-white hover:text-indigo-400 hover:underline underline-offset-4 transition-all duration-200 text-sm font-medium"
           >
             <ArrowLeft size={18} />
@@ -259,10 +336,12 @@ export default function NoteWriter() {
                     value={Aicategory}
                     onChange={(e) => setAicategory(e.target.value)}
                     className="text-xs px-2 py-1 pr-6 rounded bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none w-full"
-                  >
-                    <option value="Groq">Groq</option>
+                  > 
+                    {/* <option value="Write Yourself">Write Yourself</option> */}
+                    
                     <option value="Google Gemini">Google Gemini</option>
-                    <option value="Own Ai">Own Ai</option>
+                    <option value="Groq">Groq</option>
+                   
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={12} />
                 </div>
@@ -290,18 +369,19 @@ export default function NoteWriter() {
               <div className="flex items-center gap-3 flex-wrap">
                 <button
                   className="shadow-[inset_0_0_0_2px_#616467] text-black px-4 py-2 rounded-full tracking-wide uppercase text-xs font-bold bg-transparent hover:bg-[#616467] hover:text-white dark:text-neutral-200 transition duration-200"
-                  onClick={handleDownload}
+                  onClick={handleDownloadPDF}
                 >
                   ⬇️ Download
                 </button>
 
-                <button onClick={() => alert("AI Generate")} className="p-[3px] relative rounded-lg">
+                <button onClick={handleGenerate} className="p-[3px] relative rounded-lg">
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
                   <div className="px-8 py-2 bg-black rounded-[6px] relative flex items-center gap-1 text-xs font-semibold uppercase text-white hover:bg-transparent transition duration-200">
                     <Sparkles size={14} />
                     Generate
                   </div>
                 </button>
+
 
                 <ConfirmDialog
                   isOpen={confirmOpen}
@@ -328,6 +408,16 @@ export default function NoteWriter() {
           </motion.div>
         </div>
       </div>
+      {generating && (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="text-sm mt-2 text-purple-400 flex items-center gap-2 justify-center"
+  >
+    <Loader2 className="animate-spin h-4 w-4" />
+    Generating note...
+  </motion.div>
+)}
 
       {toast && <Toast message={toast.message} type={toast.type} />}
     </>
