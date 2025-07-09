@@ -27,7 +27,7 @@ export default function NoteWriter() {
   const [title, setTitle] = useState("");
   const [note, setNote] = useState("");
   const [category, setCategory] = useState("Other");
-  const [Aicategory, setAicategory] = useState("Google Gemini");
+  const [Aicategory, setAicategory] = useState("ChatGPT");
   const [loading, setLoading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
@@ -211,7 +211,18 @@ const handleGenerate = async () => {
           <div className="text-center">
             <TypewriterEffectSmooth className="text-2xl md:text-3xl font-bold text-center" words={words} />
           </div>
-
+  {generating && (
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+  >
+    <div className="flex flex-col items-center gap-4 p-6 bg-neutral-900 rounded-xl shadow-xl border border-blue-600">
+      <Loader2 className="animate-spin h-8 w-8 text-blue-400" />
+      <p className="text-lg text-blue-300 font-semibold">Generating note...</p>
+    </div>
+  </motion.div>
+)}
           <motion.button
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -338,9 +349,14 @@ const handleGenerate = async () => {
                     className="text-xs px-2 py-1 pr-6 rounded bg-neutral-800 border border-neutral-700 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none w-full"
                   > 
                     {/* <option value="Write Yourself">Write Yourself</option> */}
-                    
-                    <option value="Google Gemini">Google Gemini</option>
+                    <option value="ChatGPT">ChatGPT</option>
                     <option value="Groq">Groq</option>
+                     <option value="LLaMA">LLaMA</option>
+                     <option value="Google Gemini">Google Gemini</option>
+                      <option value="DeepSeek">DeepSeek</option>
+
+                     
+                    
                    
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={12} />
@@ -378,7 +394,7 @@ const handleGenerate = async () => {
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
                   <div className="px-8 py-2 bg-black rounded-[6px] relative flex items-center gap-1 text-xs font-semibold uppercase text-white hover:bg-transparent transition duration-200">
                     <Sparkles size={14} />
-                    Generate
+                    {generating ? "Generating..." : "Generate"}
                   </div>
                 </button>
 
@@ -408,16 +424,7 @@ const handleGenerate = async () => {
           </motion.div>
         </div>
       </div>
-      {generating && (
-  <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    className="text-sm mt-2 text-purple-400 flex items-center gap-2 justify-center"
-  >
-    <Loader2 className="animate-spin h-4 w-4" />
-    Generating note...
-  </motion.div>
-)}
+
 
       {toast && <Toast message={toast.message} type={toast.type} />}
     </>
