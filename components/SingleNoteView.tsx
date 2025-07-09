@@ -1,12 +1,24 @@
 "use client";
+
 import ConfirmDialog from "@/components/ConfirmDialog";
 import Toast from "@/components/Toast";
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
-import { ArrowLeft, Download, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Maximize2,
+  Minimize2,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import ConfirmDialogDelete from "./ConfirmDialogDelete";
+
 type Props = {
   id: number;
   title: string;
@@ -27,10 +39,16 @@ export default function SingleNoteView({
   const [selectedCategory] = useState(category);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error" | "warning";
+  } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const triggerToast = (message: string, type: "success" | "error" | "warning" = "success") => {
+  const triggerToast = (
+    message: string,
+    type: "success" | "error" | "warning" = "success"
+  ) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
@@ -42,13 +60,14 @@ export default function SingleNoteView({
 
   const handleDeleteConfirm = async () => {
     try {
-      // ✅ Replace this with actual backend call
-      const res = await fetch(`http://127.0.0.1:5000/delete/${id}`, { method: "DELETE" });
+      const res = await fetch(`http://127.0.0.1:5000/delete/${id}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
 
       if (res.ok) {
         triggerToast("🗑️ Note deleted successfully", "success");
-        router.push("/Notes"); // ✅ Redirect to home or list page
+        router.push("/Notes");
       } else {
         throw new Error(data.message || "Failed to delete");
       }
@@ -56,26 +75,49 @@ export default function SingleNoteView({
       triggerToast("❌ Failed to delete note", "error");
     }
   };
+const handleDownloadPDF = () => {
+  try {
+    const doc = new jsPDF();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const marginTop = 20;
+    const marginLeft = 10;
+    const lineHeight = 7;
+    const maxLineWidth = 180;
 
-  const handleDownloadPDF = () => {
-    try {
-      const doc = new jsPDF();
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(14);
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const textWidth = doc.getTextWidth(title);
-      const centerX = (pageWidth - textWidth) / 2;
-      doc.text(title, centerX, 20);
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(10);
-      const splitContent = doc.splitTextToSize(content, 180);
-      doc.text(splitContent, 10, 35);
-      doc.save(`${title}.pdf`);
-      triggerToast("✅ PDF downloaded successfully!", "success");
-    } catch {
-      triggerToast("❌ Failed to generate PDF.", "error");
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+
+    // Title centered
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const titleWidth = doc.getTextWidth(title);
+    const titleX = (pageWidth - titleWidth) / 2;
+    doc.text(title, titleX, marginTop);
+
+    // Switch to normal font for content
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+
+    // Split text into lines that fit within the max width
+    const lines = doc.splitTextToSize(content, maxLineWidth);
+
+    let cursorY = marginTop + 15;
+
+    for (let i = 0; i < lines.length; i++) {
+      if (cursorY + lineHeight > pageHeight - 10) {
+        doc.addPage();            // Add new page
+        cursorY = 20;             // Reset Y position
+      }
+      doc.text(lines[i], marginLeft, cursorY);
+      cursorY += lineHeight;
     }
-  };
+
+    doc.save(`${title}.pdf`);
+    triggerToast("✅ PDF downloaded successfully!", "success");
+  } catch (err) {
+    console.error(err);
+    triggerToast("❌ Failed to generate PDF.", "error");
+  }
+};
 
   return (
     <div className="min-h-screen px-4 py-6 bg-neutral-950 text-white w-full">
@@ -101,17 +143,29 @@ export default function SingleNoteView({
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="text-sm flex items-center gap-1 text-white hover:text-indigo-300 transition"
           >
-            {isFullscreen ? <><Minimize2 size={16} /> Exit Fullscreen</> : <><Maximize2 size={16} /> Fullscreen</>}
+            {isFullscreen ? (
+              <>
+                <Minimize2 size={16} /> Exit Fullscreen
+              </>
+            ) : (
+              <>
+                <Maximize2 size={16} /> Fullscreen
+              </>
+            )}
           </button>
         </div>
 
         <div className="space-y-1">
           <h1 className="text-xl md:text-2xl font-bold text-indigo-400">{title}</h1>
-          <p className="text-sm text-neutral-400">{selectedCategory} • {createdAt}</p>
+          <p className="text-sm text-neutral-400">
+            {selectedCategory} • {createdAt}
+          </p>
         </div>
 
-        <div className="max-h-[500px] overflow-y-auto text-sm md:text-base text-neutral-200 whitespace-pre-wrap leading-relaxed pr-2">
-          {content}
+        <div className="max-h-[500px] overflow-y-auto text-sm md:text-base text-neutral-200 whitespace-pre-wrap leading-relaxed pr-2 prose prose-invert">
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+            {content}
+          </ReactMarkdown>
         </div>
 
         <div className="flex flex-wrap gap-3 justify-end pt-4">
@@ -129,12 +183,10 @@ export default function SingleNoteView({
           >
             <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
             <span className="inline-flex h-full w-full items-center justify-center rounded-full bg-slate-950 px-4 sm:px-5 text-[10px] sm:text-xs font-semibold uppercase text-white backdrop-blur-3xl gap-1 relative z-10">
-              <Pencil size={12} />
-              Edit Note
+              <Pencil size={12} /> Edit Note
             </span>
           </button>
 
-          {/* 🗑️ Delete Button */}
           <button
             onClick={() => setDeleteConfirm(true)}
             className="bg-red-600 text-white px-4 py-2 rounded-full text-xs font-semibold uppercase shadow hover:bg-red-700 transition duration-200"
@@ -145,7 +197,6 @@ export default function SingleNoteView({
         </div>
       </motion.div>
 
-      {/* ✅ Edit Note Dialog */}
       <ConfirmDialog
         isOpen={confirmOpen}
         message="Do you want to edit this note?"
@@ -153,7 +204,6 @@ export default function SingleNoteView({
         onConfirm={handleEditConfirm}
       />
 
-      {/* ✅ Delete Note Dialog */}
       <ConfirmDialogDelete
         isOpen={deleteConfirm}
         message="Are you sure you want to delete this note?"
@@ -161,7 +211,6 @@ export default function SingleNoteView({
         onConfirm={handleDeleteConfirm}
       />
 
-      {/* ✅ Toast */}
       {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
   );

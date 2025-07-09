@@ -40,6 +40,10 @@ export default function EditableNote({
 
   const [toast, setToast] = useState<{ message: string; success: boolean } | null>(null);
   const [toastType, setToastType] = useState<ToastType>("success");
+  const [Aicategory, setAicategory] = useState("Google Gemini");
+
+  const [generating, setGenerating] = useState(false);
+  const [errors, setErrors] = useState<{ title?: string; note?: string }>({});
 
   const showToast = (message: string, type: ToastType = "success") => {
     setToast({ message, success: type === "success" });
@@ -65,47 +69,78 @@ export default function EditableNote({
     }
   };
 
-const confirmSave = async () => {
-  try {
-    const res = await fetch(`http://127.0.0.1:5000/edit/${id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title, content, category, aiSource }),
-    });
+  const confirmSave = async () => {
+    try {
+      const res = await fetch(`http://127.0.0.1:5000/edit/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title, content, category, aiSource }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.created_at) {
-      setLastUpdated(data.created_at);
-      showToast("✅ Note updated successfully!", "success");
+      if (data.created_at) {
+        setLastUpdated(data.created_at);
+        showToast("✅ Note updated successfully!", "success");
 
-      // Don't immediately redirect or close blur
-      setShowConfirm(false);
-
-      // ⏱ Wait before blur (show toast first)
-      setTimeout(() => {
-        // First exit fullscreen
-        setIsFullscreen(false);
-
-        // Then navigate after another small delay
+        setShowConfirm(false);
         setTimeout(() => {
-          router.push(`/ViewSingleNote/${id}`);
-        }, 300); // ⏱ Extra buffer
-      }, 800); // ⏱ Let user see toast
-    } else {
-      showToast("❌ Failed to update note.", "error");
+          setIsFullscreen(false);
+          setTimeout(() => {
+            router.push(`/ViewSingleNote/${id}`);
+          }, 300);
+        }, 800);
+      } else {
+        showToast("❌ Failed to update note.", "error");
+      }
+    } catch (error) {
+      console.error("Error updating note:", error);
+      showToast("⚠️ Server error. Try again later.", "warning");
     }
-  } catch (error) {
-    console.error("Error updating note:", error);
-    showToast("⚠️ Server error. Try again later.", "warning");
-  }
-};
+  };
 
+  const handleGenerate = async () => {
+    const newErrors: { title?: string; note?: string } = {};
+    if (!title.trim()) newErrors.title = "Title is required.";
+    if (!content.trim()) newErrors.note = "Note content is required.";
 
-  const handleGenerate = () => {
-    showToast("⚡ AI content generation not implemented.", "warning");
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      showToast("❌ Please fill the form.", "error");
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const response = await fetch("http://127.0.0.1:5000/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          note: content,
+          category,
+          ai_category: aiSource,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Generation failed");
+
+      const data = await response.json();
+
+      sessionStorage.setItem("title", title);
+      sessionStorage.setItem("category", category);
+      sessionStorage.setItem("note", content);
+      sessionStorage.setItem("generated", data.generated_content);
+
+      router.push("/EditGeneratedNote");
+    } catch (err) {
+      showToast("❌ Failed to generate note", "error");
+      console.error(err);
+    } finally {
+      setGenerating(false);
+    }
   };
 
   return (
@@ -121,7 +156,6 @@ const confirmSave = async () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, type: "spring" }}
       >
-        {/* Top Bar */}
         <div className="flex justify-between items-center mb-6">
           <button
             onClick={() => (isFullscreen ? setIsFullscreen(false) : router.back())}
@@ -136,22 +170,18 @@ const confirmSave = async () => {
           >
             {isFullscreen ? (
               <>
-                <Minimize2 size={16} />
-                Exit Fullscreen
+                <Minimize2 size={16} /> Exit Fullscreen
               </>
             ) : (
               <>
-                <Maximize2 size={16} />
-                Fullscreen
+                <Maximize2 size={16} /> Fullscreen
               </>
             )}
           </button>
         </div>
 
-        {/* Toast */}
         {toast && <Toast message={toast.message} type={toastType} />}
 
-        {/* Confirmation */}
         <ConfirmDialog
           isOpen={showConfirm}
           message="Do you want to update this note?"
@@ -164,7 +194,6 @@ const confirmSave = async () => {
           🕒 Last Updated: {new Date(lastUpdated).toLocaleString()}
         </p>
 
-        {/* Title Input */}
         <label className="text-sm font-medium text-white mb-1 flex items-center gap-1">
           Title <span className="text-red-500">*</span>
         </label>
@@ -179,7 +208,6 @@ const confirmSave = async () => {
           placeholder="Title"
         />
 
-        {/* Content Area */}
         <label className="text-sm font-medium text-white mb-1 flex items-center gap-1">
           Content <span className="text-red-500">*</span>
         </label>
@@ -194,7 +222,6 @@ const confirmSave = async () => {
           placeholder="Content"
         />
 
-        {/* Dropdowns and Buttons */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-center">
           <select
             className="p-2 text-sm bg-neutral-800 rounded-md border border-neutral-600 focus:border-indigo-500"
@@ -217,15 +244,16 @@ const confirmSave = async () => {
             value={aiSource}
             onChange={(e) => setAiSource(e.target.value)}
           >
-            <option value="Groq">Groq</option>
             <option value="Google Gemini">Google Gemini</option>
-            <option value="Own Ai">Own Ai</option>
+            <option value="Groq">Groq</option>
+            
+            
           </select>
 
           <button className="p-[3px] relative" onClick={handleGenerate}>
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
             <div className="px-8 py-2 bg-black rounded-[6px] relative group transition duration-200 text-white hover:bg-transparent">
-              Generate
+              {generating ? "Generating..." : "Generate"}
             </div>
           </button>
 
