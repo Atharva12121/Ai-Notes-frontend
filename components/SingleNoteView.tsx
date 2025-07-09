@@ -75,49 +75,46 @@ export default function SingleNoteView({
       triggerToast("❌ Failed to delete note", "error");
     }
   };
-const handleDownloadPDF = () => {
-  try {
-    const doc = new jsPDF();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const marginTop = 20;
-    const marginLeft = 10;
-    const lineHeight = 7;
-    const maxLineWidth = 180;
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
+  const handleDownloadPDF = () => {
+    try {
+      const doc = new jsPDF();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const marginTop = 20;
+      const marginLeft = 10;
+      const lineHeight = 7;
+      const maxLineWidth = 180;
 
-    // Title centered
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const titleWidth = doc.getTextWidth(title);
-    const titleX = (pageWidth - titleWidth) / 2;
-    doc.text(title, titleX, marginTop);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
 
-    // Switch to normal font for content
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const titleWidth = doc.getTextWidth(title);
+      const titleX = (pageWidth - titleWidth) / 2;
+      doc.text(title, titleX, marginTop);
 
-    // Split text into lines that fit within the max width
-    const lines = doc.splitTextToSize(content, maxLineWidth);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
 
-    let cursorY = marginTop + 15;
+      const lines = doc.splitTextToSize(content, maxLineWidth);
+      let cursorY = marginTop + 15;
 
-    for (let i = 0; i < lines.length; i++) {
-      if (cursorY + lineHeight > pageHeight - 10) {
-        doc.addPage();            // Add new page
-        cursorY = 20;             // Reset Y position
+      for (let i = 0; i < lines.length; i++) {
+        if (cursorY + lineHeight > pageHeight - 10) {
+          doc.addPage();
+          cursorY = 20;
+        }
+        doc.text(lines[i], marginLeft, cursorY);
+        cursorY += lineHeight;
       }
-      doc.text(lines[i], marginLeft, cursorY);
-      cursorY += lineHeight;
-    }
 
-    doc.save(`${title}.pdf`);
-    triggerToast("✅ PDF downloaded successfully!", "success");
-  } catch (err) {
-    console.error(err);
-    triggerToast("❌ Failed to generate PDF.", "error");
-  }
-};
+      doc.save(`${title}.pdf`);
+      triggerToast("✅ PDF downloaded successfully!", "success");
+    } catch (err) {
+      console.error(err);
+      triggerToast("❌ Failed to generate PDF.", "error");
+    }
+  };
 
   return (
     <div className="min-h-screen px-4 py-6 bg-neutral-950 text-white w-full">
