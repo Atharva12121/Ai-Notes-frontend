@@ -35,7 +35,6 @@ export default function SingleNoteView({
   createdAt,
 }: Props) {
   const router = useRouter();
-
   const [selectedCategory] = useState(category);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
