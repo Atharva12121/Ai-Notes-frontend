@@ -60,7 +60,7 @@ export default function SingleNoteView({
 
   const handleDeleteConfirm = async () => {
     try {
-      const res = await fetch(`http://127.0.0.1:5000/delete/${id}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/delete/${id}`, {
         method: "DELETE",
       });
       const data = await res.json();
