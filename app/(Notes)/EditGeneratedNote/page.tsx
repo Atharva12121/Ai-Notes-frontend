@@ -30,7 +30,7 @@ export default function EditGeneratedNote() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Addnote`, {
+      const response = await fetch("https://ai-notes-backend-ghj3.onrender.com/Addnotes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title, content: note, category, store: true }),
