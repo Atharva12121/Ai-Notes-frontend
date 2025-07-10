@@ -123,16 +123,6 @@ const handleGenerateFromPDF = async () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
  const handleDownloadPDF = () => {
   try {
     const doc = new jsPDF();
@@ -188,7 +178,7 @@ const handleGenerateFromPDF = async () => {
     setErrors({});
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/Addnotes", {
+      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/Addnotes', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -234,7 +224,7 @@ const handleGenerate = async () => {
 
   setGenerating(true); // show message
   try {
-    const response = await fetch("http://127.0.0.1:5000/generate", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -262,8 +252,6 @@ const handleGenerate = async () => {
     setGenerating(false); // hide message
   }
 };
-
-
 
 
 
