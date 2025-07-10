@@ -88,7 +88,7 @@ const handleGenerateFromPDF = async () => {
   }
 
   const selectedAI = Aicategory || "ChatGPT";
- const categorys = category || "ChatGPT";
+ const categorys = category || "Other";
   const formData = new FormData();
   formData.append("file", uploadedFile);
   formData.append("category", categorys);
@@ -178,7 +178,7 @@ const handleGenerateFromPDF = async () => {
     setErrors({});
 
     try {
-      const response = await fetch('${process.env.NEXT_PUBLIC_API_URL}/Addnotes', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Addnotes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
