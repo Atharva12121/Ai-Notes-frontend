@@ -62,7 +62,7 @@ export default function EditGeneratedNote() {
 
   const handleSaveNote = async () => {
     try {
-      const res = await fetch("http://localhost:5000/Addnotes", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Addnotes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
