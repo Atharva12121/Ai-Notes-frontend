@@ -1,8 +1,32 @@
+// app/(Notes)/Delete/[id]/page.tsx
+import SingleNoteView from "@/components/SingleNoteView";
 
+async function getNote(id: string) {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/show/${id}`, {
+    cache: "no-store",
+  });
 
-import SingleNoteViewWrapper from "@/components/SingleNoteViewWrapper";
+  if (!res.ok) {
+    throw new Error("Failed to fetch note");
+  }
 
-export default function Page({ params }: { params: { id: string } }) {
-  const id = parseInt(params.id); // Ensure `id` is a number
-  return <SingleNoteViewWrapper id={id} />;
+  return res.json();
+}
+
+export default async function Page({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const note = await getNote(params.id);
+
+  return (
+    <SingleNoteView
+      id={Number(note.id)}
+      title={note.title}
+      content={note.content}
+      category={note.category}
+      createdAt={note.created_at}
+    />
+  );
 }
