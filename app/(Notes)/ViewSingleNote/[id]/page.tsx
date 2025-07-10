@@ -19,7 +19,7 @@ export default function ViewSingleNote() {
 
   useEffect(() => {
     const fetchNote = async () => {
-      const res = await fetch(`http://127.0.0.1:5000/show/${params.id}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/show/${params.id}`);
       const data = await res.json();
       setNote(data);
     };

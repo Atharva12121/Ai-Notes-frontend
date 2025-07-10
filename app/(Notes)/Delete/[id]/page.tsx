@@ -33,4 +33,4 @@ export default async function Page({ params }: any) {
       createdAt={note.created_at}
     />
   );
-}
+} 

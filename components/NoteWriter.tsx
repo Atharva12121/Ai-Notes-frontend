@@ -95,7 +95,7 @@ const handleGenerateFromPDF = async () => {
   formData.append("ai_category", selectedAI);
 
   try {
-    const res = await fetch("http://localhost:5000/generate-pdf", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate-pdf`, {
       method: "POST",
       body: formData,
     });
