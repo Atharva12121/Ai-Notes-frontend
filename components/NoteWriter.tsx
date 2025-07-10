@@ -280,7 +280,7 @@ const handleGenerate = async () => {
           <motion.button
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-           onClick={() => router.push("/")}
+           onClick={() => router.push("/Notes")}
             className="mt-1 mb-2 flex items-center gap-2 text-white hover:text-indigo-400 hover:underline underline-offset-4 transition-all duration-200 text-sm font-medium"
           >
             <ArrowLeft size={18} />
