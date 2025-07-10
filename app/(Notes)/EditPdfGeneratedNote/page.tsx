@@ -12,11 +12,12 @@ export default function EditGeneratedNote() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("");
+  const [aiCategory, setAiCategory] = useState("ChatGPT");
   const [prompt, setPrompt] = useState("");
   const [generatedOutput, setGeneratedOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
-
+const selectedAI = aiCategory || "ChatGPT";
   useEffect(() => {
     setTitle(sessionStorage.getItem("title") || "");
     setContent(sessionStorage.getItem("content") || "");
@@ -34,14 +35,14 @@ export default function EditGeneratedNote() {
     }
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/generate", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           note: content,
           category,
-          ai_category: "ChatGPT",
+          ai_category:  selectedAI,
           prompt: prompt,
         }),
       });
