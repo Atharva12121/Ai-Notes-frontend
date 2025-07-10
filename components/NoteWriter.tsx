@@ -109,7 +109,7 @@ const handleGenerateFromPDF = async () => {
       sessionStorage.setItem("ai_category", selectedAI);
 
       triggerToast("✅ AI generation successful", "success");
-      router.push("/EditPdfGeneratedNote");
+      router.push("EditPdfGeneratedNote");
     } else {
       triggerToast("❌ AI generation failed", "error");
     }
