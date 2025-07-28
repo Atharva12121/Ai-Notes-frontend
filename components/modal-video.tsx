@@ -11,7 +11,7 @@ interface ModalVideoProps {
   thumbWidth: number;
   thumbHeight: number;
   thumbAlt: string;
-  video: string; // Should be a URL string like "/videos/video.mp4" or full URL
+  video: string;
   videoWidth: number;
   videoHeight: number;
 }
@@ -30,7 +30,7 @@ export default function ModalVideo({
 
   return (
     <div className="relative">
-      {/* Secondary Illustration */}
+      {/* Secondary illustration */}
       <div
         className="pointer-events-none absolute bottom-8 left-1/2 -z-10 -ml-28 -translate-x-1/2 translate-y-1/2"
         aria-hidden="true"
@@ -44,15 +44,17 @@ export default function ModalVideo({
         />
       </div>
 
-      {/* Video Thumbnail Button */}
+      {/* Video thumbnail */}
       <button
         className="group relative flex items-center justify-center rounded-2xl focus:outline-hidden focus-visible:ring-3 focus-visible:ring-indigo-200"
-        onClick={() => setModalOpen(true)}
+        onClick={() => {
+          setModalOpen(true);
+        }}
         aria-label="Watch the video"
         data-aos="fade-up"
         data-aos-delay={200}
       >
-        <figure className="relative overflow-hidden rounded-2xl before:absolute before:inset-0 before:-z-10 before:bg-gradient-to-br before:from-gray-900 before:via-indigo-500/20 before:to-gray-900">
+        <figure className="relative overflow-hidden rounded-2xl before:absolute before:inset-0 before:-z-10 before:bg-linear-to-br before:from-gray-900 before:via-indigo-500/20 before:to-gray-900">
           <Image
             className="opacity-50 grayscale"
             src={thumb}
@@ -62,6 +64,7 @@ export default function ModalVideo({
             alt={thumbAlt}
           />
         </figure>
+        {/* Play icon */}
         <span className="pointer-events-none absolute p-2.5 before:absolute before:inset-0 before:rounded-full before:bg-gray-950 before:duration-300 group-hover:before:scale-110">
           <span className="relative flex items-center gap-3">
             <svg
@@ -91,30 +94,36 @@ export default function ModalVideo({
               </defs>
             </svg>
             <span className="text-sm font-medium leading-tight text-gray-300">
-              Watch Demo <span className="text-gray-600"> - </span> 5:22
+              Watch Demo
+              <span className="text-gray-600"> - </span>
+              5:22
             </span>
           </span>
         </span>
       </button>
+      {/* End: Video thumbnail */}
 
-      {/* Modal Dialog */}
       <Dialog
         initialFocus={videoRef}
         open={modalOpen}
         onClose={() => setModalOpen(false)}
       >
-        <DialogBackdrop className="fixed inset-0 z-99999 bg-black/70 transition-opacity duration-300 ease-out data-closed:opacity-0" />
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 z-99999 bg-black/70 transition-opacity duration-300 ease-out data-closed:opacity-0"
+        />
         <div className="fixed inset-0 z-99999 flex px-4 py-6 sm:px-6">
           <div className="mx-auto flex h-full max-w-6xl items-center">
-            <DialogPanel className="aspect-video max-h-full w-full overflow-hidden rounded-2xl bg-black shadow-2xl duration-300 ease-out data-closed:scale-95 data-closed:opacity-0">
+            <DialogPanel
+              transition
+              className="aspect-video max-h-full w-full overflow-hidden rounded-2xl bg-black shadow-2xl duration-300 ease-out data-closed:scale-95 data-closed:opacity-0"
+            >
               <video
                 ref={videoRef}
                 width={videoWidth}
                 height={videoHeight}
-                controls
-                playsInline
-                preload="auto"
                 loop
+                controls
               >
                 <source src={video} type="video/mp4" />
                 Your browser does not support the video tag.
