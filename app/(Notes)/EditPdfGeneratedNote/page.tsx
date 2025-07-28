@@ -63,7 +63,7 @@ const selectedAI = aiCategory || "ChatGPT";
 
   const handleSaveNote = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/Addnotes`, {
+      const res = await fetch("https://ai-notes-backend-ghj3.onrender.com/Addnotes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
