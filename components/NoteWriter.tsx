@@ -86,10 +86,10 @@ const handleGenerateFromPDF = async () => {
     triggerToast("Please upload a file and fill category", "error");
     return;
   }
-
+// aaaaaaa
   const selectedAI = Aicategory || "ChatGPT";
  const categorys = category || "Other";
-  const formData = new FormData();
+  const formData = new FormData(); 
   formData.append("file", uploadedFile);
   formData.append("category", categorys);
   formData.append("ai_category", selectedAI);
@@ -179,7 +179,7 @@ const handleGenerateFromPDF = async () => {
 
     try {
       const response = await fetch("https://ai-notes-backend-ghj3.onrender.com/Addnotes", {
-      
+    
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
