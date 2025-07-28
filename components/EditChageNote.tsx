@@ -256,7 +256,7 @@ export default function EditableNote({
             onChange={(e) => setAiSource(e.target.value)}
           >
             <option value="ChatGPT">ChatGPT</option>
-            <option value="Groq">Groq</option> 
+            <option value="Groq">Grok</option> 
             <option value="LLaMA">LLaMA</option>
             <option value="Google Gemini">Google Gemini</option>
             <option value="DeepSeek">DeepSeek</option>
