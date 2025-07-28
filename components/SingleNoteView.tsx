@@ -118,7 +118,7 @@ export default function SingleNoteView({
   return (
     <div className="min-h-screen px-4 py-6 bg-neutral-950 text-white w-full">
       <button
-        onClick={() => router.back()}
+         onClick={() => router.push("/Notes")}
         className="mb-6 flex items-center gap-2 text-white hover:text-indigo-400 hover:underline underline-offset-4 text-sm font-medium"
       >
         <ArrowLeft size={18} /> Back
